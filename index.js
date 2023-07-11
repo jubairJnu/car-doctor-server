@@ -28,6 +28,7 @@ async function run() {
     await client.connect();
 
     const serviceCollection = client.db("doctorCar").collection("services");
+    const bookedCollection = client.db("doctorCar").collection('booked');
 
     app.get('/services', async (req, res) => {
       const cursor = serviceCollection.find();
@@ -39,6 +40,32 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) }
       const result= await serviceCollection.findOne(query);
+      res.send(result);
+    });
+
+
+    // bookings
+
+    app.get('/bookings', async(req,res)=>{
+      let query = {};
+      if(req.query?.email){
+        query = {email: req.query.email}
+      }
+      const result = await bookedCollection.find(query).toArray();
+      res.send(result);
+    })
+
+    app.post('/bookings', async(req, res) =>{
+      const booking = req.body;
+      const result = await bookedCollection.insertOne(booking);
+      res.send(result);
+      
+    })
+
+    app.delete('/bookings/:id',async(req,res)=>{
+      const id = req.params.id;
+      const query ={_id: new ObjectId(id)}
+      const result = await bookedCollection.deleteOne(query)
       res.send(result);
     })
 
